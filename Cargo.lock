@@ -3,6 +3,12 @@
 version = 3
 
 [[package]]
+name = "antd-yew"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a2c97f32dc5fa028436d4b6a07f6b17a884058193a762e60e809a629780b4ce"
+
+[[package]]
 name = "anyhow"
 version = "1.0.81"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -421,5 +427,7 @@ dependencies = [
 name = "yew_demo"
 version = "0.1.0"
 dependencies = [
+ "antd-yew",
+ "log",
  "yew",
 ]
