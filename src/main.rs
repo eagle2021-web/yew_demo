@@ -1,15 +1,13 @@
-use std::fmt::format;
-use std::fs;
-use futures::StreamExt; // 用于流的扩展方法
+use futures::StreamExt;
+use serde::{Deserialize, Serialize};
+// 用于流的扩展方法
 use wasm_bindgen::{JsCast, JsValue};
-use wasm_bindgen_futures::JsFuture;
-use web_sys::{Response, ReadableStream, ReadableStreamDefaultReader, TextDecoder, window, BlobPropertyBag, Blob, Url};
-use yew::prelude::*;
-use js_sys::{Reflect, Uint8Array};
 use wasm_bindgen::prelude::wasm_bindgen;
+use web_sys::{Blob, BlobPropertyBag, Url, window};
+use yew::prelude::*;
 use yew::web_sys::console;
-use serde::{Serialize, Deserialize};
-use crate::models::ChatCompletionData;
+
+use crate::utils::reader_util::ReaderUtil;
 
 mod models;
 mod utils;
@@ -52,8 +50,7 @@ impl Component for PostRequestComponent {
                 // Initiate the fetch process
                 let link = self.link.clone();
                 wasm_bindgen_futures::spawn_local(async move {
-                    let window = web_sys::window().expect("no global `window` exists");
-                    match fetch_and_log("http://localhost:8003/reactive-stream22").await {
+                    match ReaderUtil::fetch_and_log("http://localhost:8003/reactive-stream22").await {
                         Ok(s) => {
                             link.send_message(Msg::DownloadFile("filename.txt".into(), s));
                         }
@@ -62,16 +59,13 @@ impl Component for PostRequestComponent {
                 });
             }
             Msg::DataChunk(chunk) => {
-                // Handle a chunk of data
-                // let decoder = TextDecoder::new_with_label("utf-8").unwrap();
-                // let text = decoder.decode_with_u8_array(&chunk).unwrap();
-                // self.data.push_str(&text);
+
             }
             Msg::DataComplete => {
-                // Handle completion of data streaming
+
             }
-            Msg::Error(error) => {
-                // Handle error
+            Msg::Error(_error) => {
+
             }
             Msg::DownloadFile(file_name, content) => {
                 download_file(&file_name, &content);
@@ -94,59 +88,6 @@ impl Component for PostRequestComponent {
     }
 }
 
-
-#[wasm_bindgen]
-pub async fn fetch_and_log(url: &str) -> Result<String, JsValue> {
-    let window = web_sys::window().unwrap();
-    let resp = JsFuture::from(window.fetch_with_str(url)).await?.dyn_into::<Response>()?;
-    let reader = resp.body().ok_or("no body")?.get_reader();
-// 将`reader`（原本是`Object`类型）转换为`JsValue`。
-    let reader_js_value = JsValue::from(reader);
-    let mut reader = ReadableStreamDefaultReader::from(reader_js_value);
-    let mut bytes = Vec::new();
-    let mut all = String::new();
-    loop {
-        let result = JsFuture::from(reader.read()).await?;
-        let value = Reflect::get(&result, &JsValue::from_str("value"))?;
-        let comp = Reflect::get(&result, &JsValue::from_str("done"));
-        if let Ok(js_val) = comp {
-            if js_val.as_bool().unwrap() {
-                console::log_1(&"Reading completed".into());
-                break;
-            }
-        } else {
-            console::log_1(&"Error reading stream".into());
-        }
-        let chunk = Uint8Array::new(&value);
-        bytes.extend_from_slice(&chunk.to_vec());
-        let mut tmp_bytes = Vec::new();
-        tmp_bytes.extend_from_slice(&chunk.to_vec());
-        let s = String::from_utf8_lossy(&tmp_bytes);
-        // let decoded_str = text_decoder.decode().unwrap();
-        log_to_console("---------");
-        log_to_console(&format!("Chunk: {}", s));
-        let text = String::from_utf8_lossy(&bytes);
-        for each in text.split("data:").into_iter() {
-            let js:serde_json::error::Result<ChatCompletionData> = serde_json::from_str(each);
-            if js.is_ok() {
-                let obj = js.unwrap();
-                log_to_console(&format!("obj = {:?}", obj));
-            } else {
-                log_to_console("------------------------------");
-                log_to_console(each);
-                log_to_console("---------1111");
-            }
-        }
-    }
-
-    let text = String::from_utf8(bytes).map_err(|_| JsValue::from_str("Error converting to string"))?;
-    // log_to_console(&text);
-    // fs::write("a.txt", text).expect("write err");
-    // Example of sending a message once data is complete, adjusting as per your actual Msg type and link handling
-    // self.link.send_message(Msg::DataComplete);
-
-    Ok(text)
-}
 
 #[wasm_bindgen]
 extern "C" {
