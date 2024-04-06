@@ -140,5 +140,6 @@ pub fn download_file(file_name: &str, content: &str) {
 // Additional helper functions and stream processing should be implemented here.
 fn main() {
     // https://yew.rs/zh-Hans/docs/0.18.0/getting-started/build-a-sample-app
+    // https://dev.to/arctic_hen7/how-to-set-up-tailwind-css-with-yew-and-trunk-il9
     yew::start_app::<PostRequestComponent>();
 }

@@ -6,3 +6,20 @@
     border-radius: 5px;
     padding: 10px 20px;
 }
+.ant-button {
+    background-color: #1890ff;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 0.25rem;
+}
+.div_com {
+    background-color: #afcce6;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 0.25rem;
+    display: inline-block;
+}
