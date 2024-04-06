@@ -35,20 +35,14 @@ impl ReaderUtil {
             let mut tmp_bytes = Vec::new();
             tmp_bytes.extend_from_slice(&chunk.to_vec());
             let s = String::from_utf8_lossy(&tmp_bytes);
-            log_to_console("---------");
-            log_to_console(&format!("Chunk: {}", s));
             let text = String::from_utf8_lossy(&bytes);
             let mut all_parsed = true;
             let mut tmp_all = String::new();
             for each in text.split("data:").into_iter() {
-                // log_to_console(each);
                 log_to_console(&format!("{}", each.len()));
                 if each.is_empty() || !each.contains("{"){
                     continue;
                 }
-                // if each.strip_suffix(" ").unwrap().is_empty() {
-                //     continue;
-                // }
                 let js: serde_json::error::Result<ChatCompletionData> = serde_json::from_str(each);
                 if js.is_ok() {
                     let obj = js.unwrap();
@@ -56,9 +50,6 @@ impl ReaderUtil {
                     let content = &obj.choices[0].delta.content;
                     tmp_all.push_str(content);
                 } else {
-                    log_to_console("------------------------------");
-                    log_to_console(each);
-                    log_to_console("---------1111");
                     all_parsed = false;
                     break;
                 }
@@ -68,7 +59,6 @@ impl ReaderUtil {
                 bytes.clear();
                 continue
             }
-            log_to_console("---------not all parsed.");
             let text = String::from_utf8_lossy(&bytes);
             log_to_console(&text);
         }
