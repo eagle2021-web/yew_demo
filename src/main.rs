@@ -1,110 +1,124 @@
+use futures::StreamExt; // 用于流的扩展方法
+use wasm_bindgen::{JsCast, JsValue};
+use wasm_bindgen_futures::JsFuture;
+use web_sys::{Response, ReadableStream, ReadableStreamDefaultReader, TextDecoder};
 use yew::prelude::*;
-use yew::services::fetch::{FetchService, FetchTask, Request, Response};
-use yew::format::Nothing;
+use js_sys::{Uint8Array};
+use wasm_bindgen::prelude::wasm_bindgen;
 use yew::web_sys::console;
-
-enum Msg {
-    AddOne,
-    ToggleColor,
+pub enum Msg {
     FetchData,
-    FetchSuccess(String), // Define a message variant to handle successful fetch response
-    FetchFailed, // Define a message variant to handle failed fetch response
+    DataChunk(Vec<u8>),
+    DataComplete,
+    Error(String),
 }
 
-struct Model {
+pub struct PostRequestComponent {
     link: ComponentLink<Self>,
-    value: i64,
-    color: String,
-    fetch_task: Option<FetchTask>, // Store the fetch task to be able to cancel it if needed
+    data: String,
 }
-
 fn log_to_console(message: &str) {
     console::log_1(&message.into());
 }
-
-impl Component for Model {
+impl Component for PostRequestComponent {
     type Message = Msg;
     type Properties = ();
 
-    fn create(_props: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
         Self {
             link,
-            value: 0,
-            color: "red".into(),
-            fetch_task: None,
+            data: "".into(),
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::AddOne => {
-                self.value += 1;
-                true
-            }
-            Msg::ToggleColor => {
-                self.color = if self.color == "red" { "green".into() } else { "red".into() };
-                true
-            }
             Msg::FetchData => {
-                // Construct the request
-                let request = Request::get("http://localhost:8003/stu")
-                    .body(Nothing)
-                    .expect("Failed to build request.");
-
-                // Send the request and store the task
-                let task = FetchService::fetch(request, self.link.callback(|response: Response<Result<String, _>>| {
-                    if response.status().is_success() {
-                        Msg::FetchSuccess(response.into_body().unwrap())
-                    } else {
-                        Msg::FetchFailed
+                log_to_console("111111");
+                println!("resp_value = {:?}", "callback");
+                // let callback = self.link.callback(|_: Msg| Msg::FetchData);
+                log_to_console("2222");
+                // callback.emit(Msg::FetchData); // Trigger the fetch
+                log_to_console("3333");
+                // Initiate the fetch process
+                wasm_bindgen_futures::spawn_local(async move {
+                    let window = web_sys::window().expect("no global `window` exists");
+                    match fetch_and_log("http://localhost:8003/reactive-stream22").await {
+                        Ok(_) => {}
+                        Err(_) => {}
                     }
-                })).expect("Failed to start request");
-
-                self.fetch_task = Some(task);
-                false // Do not trigger a re-render immediately
+                });
             }
-            Msg::FetchSuccess(response) => {
-                // Handle successful fetch response here
-                // For example, you can log the response or update the state
-                log::info!("Fetch success! Response: {}", response);
-                log_to_console(&format!("Fetch success! Response: {}", response));
-                true // Trigger a re-render
+            Msg::DataChunk(chunk) => {
+                // Handle a chunk of data
+                // let decoder = TextDecoder::new_with_label("utf-8").unwrap();
+                // let text = decoder.decode_with_u8_array(&chunk).unwrap();
+                // self.data.push_str(&text);
             }
-            Msg::FetchFailed => {
-                // Handle failed fetch response here
-                // For example, you can log the failure or show an error message
-                log::error!("Fetch failed!");
-                true // Trigger a re-render
+            Msg::DataComplete => {
+                // Handle completion of data streaming
+            }
+            Msg::Error(error) => {
+                // Handle error
             }
         }
+        true
     }
 
     fn change(&mut self, _props: Self::Properties) -> ShouldRender {
-        false
+        true
     }
 
-    // 在 update 方法中输出信息
-
-
-    // 在 view 方法中的按钮点击回调中调用 log_to_console 方法
     fn view(&self) -> Html {
         html! {
-            <div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
-                <div style=format!("width: 100px; height: 100px; background-color: {}", self.color)>
-                    <button class="custom-button" onclick=self.link.callback(|_| Msg::AddOne)>{ "+1" }</button>
-                    <button onclick=self.link.callback(|_| Msg::ToggleColor)>{ "Toggle Color" }</button>
-                    <button onclick=self.link.callback(|_| {
-                        log_to_console("Fetch Data button clicked");
-                        Msg::FetchData
-                    })>{ "Fetch Data" }</button>
-                    <p>{ self.value }</p>
-                </div>
-            </div>
+            <>
+                <button class="custom-button" onclick=self.link.callback(|_| Msg::FetchData)>{ "Fetch Data" }</button>
+                <div>{ &self.data }</div>
+            </>
         }
     }
 }
+#[wasm_bindgen]
+pub async fn fetch_and_log(url: &str) -> Result<(), JsValue> {
+    let window = web_sys::window().unwrap();
+    let resp = JsFuture::from(window.fetch_with_str(url)).await?.dyn_into::<Response>()?;
+    let reader = resp.body().ok_or("no body")?.get_reader();
+// 将`reader`（原本是`Object`类型）转换为`JsValue`。
+    let reader_js_value = JsValue::from(reader);
+    let mut reader = ReadableStreamDefaultReader::from(reader_js_value);
+    let mut bytes = Vec::new();
+    let text_decoder = TextDecoder::new().unwrap();
 
+    loop {
+        let result = JsFuture::from(reader.read()).await?;
+        // let a = result.as_string().unwrap();
+        // log_to_console("{:?}", result);
+        let value = js_sys::Reflect::get(&result, &JsValue::from_str("value"))?;
+
+        if js_sys::Reflect::get(&result, &JsValue::from_str("done"))?.as_bool().unwrap() {
+            break;
+        }
+        let chunk = Uint8Array::new(&value);
+        bytes.extend_from_slice(&chunk.to_vec());
+        let mut tmp_bytes = Vec::new();
+        tmp_bytes.extend_from_slice(&chunk.to_vec());
+        let s = String::from_utf8_lossy(&tmp_bytes);
+        // let decoded_str = text_decoder.decode().unwrap();
+        log_to_console("---------");
+        log_to_console(&format!("Chunk: {}", s));
+    }
+
+    let text = String::from_utf8(bytes).map_err(|_| JsValue::from_str("Error converting to string"))?;
+    // log_to_console(&text);
+
+    // Example of sending a message once data is complete, adjusting as per your actual Msg type and link handling
+    // self.link.send_message(Msg::DataComplete);
+
+    Ok(())
+}
+
+// Additional helper functions and stream processing should be implemented here.
 fn main() {
     // https://yew.rs/zh-Hans/docs/0.18.0/getting-started/build-a-sample-app
-    yew::start_app::<Model>();
+    yew::start_app::<PostRequestComponent>();
 }
