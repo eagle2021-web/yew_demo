@@ -58,6 +58,7 @@ impl Component for JFrameworkService {
     }
 
     fn view(&self) -> Html {
+        let array = vec!["Item 1", "Item 2", "Item 3"]; // 示例数组
         html! {
             <div>
                 <input
@@ -67,7 +68,10 @@ impl Component for JFrameworkService {
                 />
                 <button class="custom-button" onclick=self.link.callback(|_| Msg::FetchResponse )>{ "Fetch Data" }</button>
             <div>{&self.input_value}</div>
+            { for array.iter().map(|item| html! { <div class="div_com">{ item }</div> }) }
             </div>
+
+            // 假如我有一个数组，长度为3，我希望将数组每个元素对应一个div,这种怎么写
         }
     }
 }
