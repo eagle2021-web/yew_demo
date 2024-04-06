@@ -528,7 +528,9 @@ dependencies = [
 name = "yew_demo"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "futures",
+ "http",
  "js-sys",
  "log",
  "serde",

@@ -9,6 +9,7 @@ use yew::web_sys::console;
 use crate::components::button::AntButton;
 
 use crate::utils::reader_util::ReaderUtil;
+use crate::utils::rewquest::JFrameworkService;
 
 mod models;
 mod utils;
@@ -87,6 +88,7 @@ impl Component for PostRequestComponent {
                 <div>{ &self.data }</div>
                         <div>
                 <AntButton text="Click me" on_click=self.link.callback(|_| Msg::FetchData)/>
+                <JFrameworkService/>
             </div>
             </>
         }
