@@ -1,13 +1,28 @@
-<!DOCTYPE html><html><head>
-    <meta charset="utf-8">
-    <title>Yew App</title>
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yew App22222</title>
+    <link rel="stylesheet" href="../styles.css"> <!-- Link to your CSS file -->
+    <style>
+        .custom-button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+        }
+    </style>
 
-<link rel="preload" href="/yew_demo-d1d813029f938637_bg.wasm" crossorigin="anonymous" integrity="sha384-uJIsyCixngmtOIF7lKE1naefFEx8YKliJCBU7-Jq92Y27HJXSfYV8H9bzp64WX1y" as="fetch" type="application/wasm">
-<link rel="modulepreload" href="/yew_demo-d1d813029f938637.js" crossorigin="anonymous" integrity="sha384-nu9BsA7276LEuJVFYCyuZzIjl-IjKzYG5MFzUm1cI0NCSvaCHnaZQqZB2x1YAVDp"></head>
+<link rel="preload" href="/yew_demo-ca3a3d68fff3baac_bg.wasm" crossorigin="anonymous" integrity="sha384-_RBD3zyMp7bbnPOo4zHKPcKPbD1M2DE8v5hI0eRpjPlqRSKmuG0I6Q5xRkUfTaqO" as="fetch" type="application/wasm">
+<link rel="modulepreload" href="/yew_demo-ca3a3d68fff3baac.js" crossorigin="anonymous" integrity="sha384-T8UnjViSBgRgF4KW3B5svtjY5P_c9fxa1tDn6xAnqS4F_vGOAX_0W8BWo7o32pG9"></head>
 <body>
+<div id="app" class="custom-button">123123123</div>
+<!--<script type="module" src="./pkg/yew_app.js"></script>-->
+
+
 <script type="module">
-import init, * as bindings from '/yew_demo-d1d813029f938637.js';
-init('/yew_demo-d1d813029f938637_bg.wasm');
+import init, * as bindings from '/yew_demo-ca3a3d68fff3baac.js';
+init('/yew_demo-ca3a3d68fff3baac_bg.wasm');
 window.wasmBindings = bindings;
 
 </script><script>"use strict";

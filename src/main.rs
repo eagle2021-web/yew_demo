@@ -91,7 +91,7 @@ impl Component for Model {
         html! {
             <div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
                 <div style=format!("width: 100px; height: 100px; background-color: {}", self.color)>
-                    <button onclick=self.link.callback(|_| Msg::AddOne)>{ "+1" }</button>
+                    <button class="custom-button" onclick=self.link.callback(|_| Msg::AddOne)>{ "+1" }</button>
                     <button onclick=self.link.callback(|_| Msg::ToggleColor)>{ "Toggle Color" }</button>
                     <button onclick=self.link.callback(|_| {
                         log_to_console("Fetch Data button clicked");
@@ -105,5 +105,6 @@ impl Component for Model {
 }
 
 fn main() {
+    // https://yew.rs/zh-Hans/docs/0.18.0/getting-started/build-a-sample-app
     yew::start_app::<Model>();
 }
