@@ -15,7 +15,7 @@ impl ReaderUtil {
         let resp = JsFuture::from(window.fetch_with_str(url)).await?.dyn_into::<Response>()?;
         let reader = resp.body().ok_or_else(|| JsValue::from_str("no body"))?.get_reader();
         let reader_js_value = JsValue::from(reader);
-        let mut reader = ReadableStreamDefaultReader::from(reader_js_value);
+        let reader = ReadableStreamDefaultReader::from(reader_js_value);
         let mut bytes = Vec::new();
         let mut all = String::new();
         loop {

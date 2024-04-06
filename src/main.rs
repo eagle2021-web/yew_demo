@@ -6,11 +6,13 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::{Blob, BlobPropertyBag, Url, window};
 use yew::prelude::*;
 use yew::web_sys::console;
+use crate::components::button::AntButton;
 
 use crate::utils::reader_util::ReaderUtil;
 
 mod models;
 mod utils;
+mod components;
 
 pub enum Msg {
     FetchData,
@@ -58,7 +60,7 @@ impl Component for PostRequestComponent {
                     }
                 });
             }
-            Msg::DataChunk(chunk) => {
+            Msg::DataChunk(_chunk) => {
 
             }
             Msg::DataComplete => {
@@ -83,6 +85,9 @@ impl Component for PostRequestComponent {
             <>
                 <button class="custom-button" onclick=self.link.callback(|_| Msg::FetchData)>{ "Fetch Data" }</button>
                 <div>{ &self.data }</div>
+                        <div>
+                <AntButton text="Click me" on_click=self.link.callback(|_| Msg::FetchData)/>
+            </div>
             </>
         }
     }
