@@ -1,4 +1,3 @@
-use std::fmt::format;
 use js_sys::{Reflect, Uint8Array};
 use wasm_bindgen::{JsCast, JsValue, prelude::wasm_bindgen};
 use wasm_bindgen_futures::JsFuture;
@@ -34,7 +33,6 @@ impl ReaderUtil {
             bytes.extend_from_slice(&chunk.to_vec());
             let mut tmp_bytes = Vec::new();
             tmp_bytes.extend_from_slice(&chunk.to_vec());
-            let s = String::from_utf8_lossy(&tmp_bytes);
             let text = String::from_utf8_lossy(&bytes);
             let mut all_parsed = true;
             let mut tmp_all = String::new();
